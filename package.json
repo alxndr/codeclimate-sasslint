@@ -1,0 +1,17 @@
+{
+  "name": "codeclimate-engine-sasslint",
+  "version": "1.0.0-beta",
+  "description": "A Code Climate engine that runs sasstools/sass-lint",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "codeclimate",
+    "sass",
+    "scss",
+    "lint"
+  ],
+  "author": "Alexander Quine",
+  "license": "MIT"
+}
