@@ -1,9 +1,10 @@
 FROM node:6.3.1
 
-RUN mkdir -p /app
+# Code Climate creates this directory, but let's be extra sure
+RUN mkdir -p /code
 
-WORKDIR /app
-ADD . /app
+WORKDIR /code
+ADD . /code
 
 RUN npm install
 
