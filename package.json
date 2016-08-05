@@ -12,6 +12,14 @@
     "scss",
     "lint"
   ],
-  "author": "Alexander Quine",
-  "license": "MIT"
+  "homepage": "https://github.com/alxndr/codeclimate-engine-sasslint",
+  "author": "Alexander Quine <alxndr+npm@gmail.com> (http://eleven-twelve.net)",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/alxndr/codeclimate-engine-sasslint.git"
+  },
+  "dependencies": {
+    "sass-lint": "^1.8.2"
+  }
 }
