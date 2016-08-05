@@ -46,11 +46,15 @@ function filterFiles(files) {
 }
 
 function formatIssue(message, filename) {
+  var description = message.message;
+  if (message.column !== 1) {
+    description += " (at column: " + message.column + ")";
+  }
   return JSON.stringify({
     type: "issue",
-    check_name: "sass-lint", // TODO extract meaningful rule identifier
-    description: message.message,
-    categories: ["Bug Risk"], // TODO is this right?
+    check_name: message.ruleId,
+    description: description,
+    categories: ["Bug Risk"],
     location:{
       path: filename,
       lines: {
