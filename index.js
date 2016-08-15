@@ -33,6 +33,7 @@ function diff(a1, a2) {
 
 function buildFilesWithExclusions(exclusions) {
   // Returns file paths based on the exclude_paths values in config file
+  // ...excluding files that start with a .
   var allFiles = glob.sync(path.join(MAIN_DIR, "**", "**"));
   var excludedFiles = buildFiles(exclusions);
   return diff(allFiles, excludedFiles);
@@ -59,7 +60,7 @@ function formatIssue(message, filename) {
     type: "issue",
     check_name: message.ruleId,
     description: description,
-    categories: ["Bug Risk"],
+    categories: ["Bug Risk"], // TODO look into what this can be used for
     location:{
       path: filename,
       lines: {
@@ -79,11 +80,12 @@ function constructFileInfo(filepath) {
 }
 
 function processFile(filepath) {
-  var filename = path.relative(CWD, filepath); // this working?
+  var filename = path.relative(CWD, filepath);
   var fileInfo = constructFileInfo(filepath);
   var result = sasslint.lintFileText(fileInfo, {}, sass_config);
   if (result && result.messages && result.messages.length) {
     result.messages.forEach(function(message) {
+      // Code Climate is looking for findings on STDOUT
       console.log(formatIssue(message, filename));
     });
   }
