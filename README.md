@@ -1,4 +1,4 @@
-An unofficial Code Climate engine for running sasstools/sass-lint.
+An unofficial Code Climate engine for running [sasstools/sass-lint](sasslint).
 
 
 ### dev notes
@@ -21,3 +21,6 @@ $ echo -e "engines:\n\tsasslint:\n\t\tenabled: true" > .codeclimate.yml
 # run the new linter on the current directory
 $ codeclimate analyze --dev
 ```
+
+
+[sasslint]: https://github.com/sasstools/sass-lint
