@@ -1,0 +1,13 @@
+section { width: 100%; }
+
+h1, h2 { font-family: "Tungsten", Tahoma, Arial, sans-serif; font-weight: normal; }
+
+h1 { font-size: 40px; }
+
+p { font-family: "Whitney", Arial, sans-serif; font-size: 16px; line-height: 20px; padding-bottom: 20px; }
+
+a { cursor: pointer; }
+
+.clearfixed::after { content: ""; display: block; clear: both; }
+
+#header { margin-bottom: 0; }
