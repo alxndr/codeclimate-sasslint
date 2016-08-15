@@ -43,7 +43,7 @@ function buildFilesWithInclusions(inclusions) {
   return buildFiles(inclusions);
 }
 
-function filterFiles(files) {
+function filterOutDirectories(files) {
   // Filters the directory paths out
   return files.filter(function(file) {
     return !fs.lstatSync(file).isDirectory();
@@ -81,9 +81,7 @@ function constructFileInfo(filepath) {
 function processFile(filepath) {
   var filename = path.relative(CWD, filepath); // this working?
   var fileInfo = constructFileInfo(filepath);
-  var more_sass_options = {options:{
-  }};
-  var result = sasslint.lintFileText(fileInfo, more_sass_options, sass_config);
+  var result = sasslint.lintFileText(fileInfo, {}, sass_config);
   if (result && result.messages && result.messages.length) {
     result.messages.forEach(function(message) {
       console.log(formatIssue(message, filename));
@@ -91,7 +89,7 @@ function processFile(filepath) {
   }
 }
 
-function determineAnalysisFiles() {
+function filesForAnalysisAccordingToCodeClimate() {
   if (fs.existsSync("/config.json")) {
     var engineConfig = JSON.parse(fs.readFileSync("/config.json"));
     if (engineConfig.hasOwnProperty("include_paths")) {
@@ -104,23 +102,28 @@ function determineAnalysisFiles() {
   return [];
 }
 
-function run() {
-  var analysisFiles = filterFiles(determineAnalysisFiles());
-
+function determineFilesToAnalyze() {
+  var analysisFiles = filterOutDirectories(filesForAnalysisAccordingToCodeClimate());
   var sass_config_text = fs.readFileSync(path.relative(CWD, sass_config), "utf8");
-  var includeGlobs = yaml.parse(sass_config_text).files.include;
-  if (includeGlobs) {
-    if (!Array.isArray(includeGlobs)) {
-      includeGlobs = [includeGlobs];
-    }
-    analysisFiles = analysisFiles.filter(function(file) {
-      return !!includeGlobs.find(function(includeGlob) {
-        return minimatch(file, includeGlob);
+  var parsed_sass_config = yaml.parse(sass_config_text);
+  if (parsed_sass_config && parsed_sass_config.files) {
+    var includeGlobs = parsed_sass_config.files.include;
+    if (includeGlobs) {
+      if (!Array.isArray(includeGlobs)) {
+        includeGlobs = [includeGlobs];
+      }
+      return analysisFiles.filter(function(file) {
+        return !!includeGlobs.find(function(includeGlob) {
+          return minimatch(file, includeGlob);
+        });
       });
-    });
+    }
   }
+  return analysisFiles;
+}
 
-  analysisFiles.forEach(function(filepath) {
+function run() {
+  determineFilesToAnalyze().forEach(function(filepath) {
     processFile(filepath); // will print any results to stdout... json chunks separated by a null byte
   });
 }
