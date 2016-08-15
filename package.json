@@ -22,7 +22,9 @@
   "dependencies": {
     "fs": "0.0.2",
     "glob": "^7.0.5",
+    "minimatch": "^3.0.3",
     "path": "^0.12.7",
-    "sass-lint": "^1.8.2"
+    "sass-lint": "^1.8.2",
+    "yamljs": "^0.2.8"
   }
 }

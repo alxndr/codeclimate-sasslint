@@ -3,6 +3,8 @@
 var fs = require("fs");
 var glob = require("glob");
 var path = require("path");
+var yaml = require("yamljs");
+var minimatch = require("minimatch");
 
 var sasslint = require("sass-lint");
 
@@ -104,6 +106,19 @@ function determineAnalysisFiles() {
 
 function run() {
   var analysisFiles = filterFiles(determineAnalysisFiles());
+
+  var sass_config_text = fs.readFileSync(path.relative(CWD, sass_config), "utf8");
+  var includeGlobs = yaml.parse(sass_config_text).files.include;
+  if (includeGlobs) {
+    if (!Array.isArray(includeGlobs)) {
+      includeGlobs = [includeGlobs];
+    }
+    analysisFiles = analysisFiles.filter(function(file) {
+      return !!includeGlobs.find(function(includeGlob) {
+        return minimatch(file, includeGlob);
+      });
+    });
+  }
 
   analysisFiles.forEach(function(filepath) {
     processFile(filepath); // will print any results to stdout... json chunks separated by a null byte
