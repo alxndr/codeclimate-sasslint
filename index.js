@@ -1,16 +1,19 @@
 /* global console, process, require */
 
 var fs = require("fs");
-var glob = require('glob');
+var glob = require("glob");
 var path = require("path");
 
 var sasslint = require("sass-lint");
 
-var SASS_LINT_FILE = "/.sass-lint.yml";
+var CWD = process.cwd();
+var MAIN_DIR = "/code";
+var SASS_CONFIG_FILE = ".sass-lint.yml";
+var sass_config = path.join(MAIN_DIR, SASS_CONFIG_FILE);
 
 function buildFiles(paths) {
-  return paths.reduce(function(files, path) {
-    files.push.apply(files, glob.sync("/code/" + path + "**", {}));
+  return paths.reduce(function(files, filepath) {
+    files.push.apply(files, glob.sync(path.join(MAIN_DIR, filepath, "**")));
     return files;
   }, []);
 }
@@ -28,7 +31,7 @@ function diff(a1, a2) {
 
 function buildFilesWithExclusions(exclusions) {
   // Returns file paths based on the exclude_paths values in config file
-  var allFiles = glob.sync("/code/**/**", {});
+  var allFiles = glob.sync(path.join(MAIN_DIR, "**", "**"));
   var excludedFiles = buildFiles(exclusions);
   return diff(allFiles, excludedFiles);
 }
@@ -65,33 +68,44 @@ function formatIssue(message, filename) {
   }) + "\0"; // each (?) issue must be followed by a null byte
 }
 
+function constructFileInfo(filepath) {
+  return {
+    text: fs.readFileSync(filepath, "utf8"),
+    filename: filepath,
+    format: "scss" // TODO determine whether it's sass or scss
+  };
+}
+
 function processFile(filepath) {
-  var text = fs.readFileSync(filepath, "utf8");
-  var filename = path.relative(process.cwd(), filepath);
-  var result = sasslint.lintFileText({
-    text: text,
-    filename: filename
-  }, {}, SASS_LINT_FILE);
+  var filename = path.relative(CWD, filepath); // this working?
+  var fileInfo = constructFileInfo(filepath);
+  var more_sass_options = {options:{
+  }};
+  var result = sasslint.lintFileText(fileInfo, more_sass_options, sass_config);
   if (result && result.messages && result.messages.length) {
     result.messages.forEach(function(message) {
-      console.error("sass lint message:", message);
       console.log(formatIssue(message, filename));
     });
   }
 }
 
-function run() {
-  var analysisFiles = [];
+function determineAnalysisFiles() {
   if (fs.existsSync("/config.json")) {
     var engineConfig = JSON.parse(fs.readFileSync("/config.json"));
     if (engineConfig.hasOwnProperty("include_paths")) {
-      analysisFiles = buildFilesWithInclusions(engineConfig.include_paths);
-    } else if (engineConfig.hasOwnProperty("exclude_paths")) {
-      analysisFiles = buildFilesWithExclusions(engineConfig.exclude_paths);
+      return buildFilesWithInclusions(engineConfig.include_paths);
+    }
+    if (engineConfig.hasOwnProperty("exclude_paths")) {
+      return buildFilesWithExclusions(engineConfig.exclude_paths);
     }
   }
+  return [];
+}
 
-  filterFiles(analysisFiles).forEach(function(filepath) {
+function run() {
+  var analysisFiles = filterFiles(determineAnalysisFiles());
+
+  analysisFiles.forEach(function(filepath) {
     processFile(filepath); // will print any results to stdout... json chunks separated by a null byte
   });
 }
