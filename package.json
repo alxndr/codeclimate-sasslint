@@ -20,6 +20,9 @@
     "url": "https://github.com/alxndr/codeclimate-engine-sasslint.git"
   },
   "dependencies": {
+    "fs": "0.0.2",
+    "glob": "^7.0.5",
+    "path": "^0.12.7",
     "sass-lint": "^1.8.2"
   }
 }
