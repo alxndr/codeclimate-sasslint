@@ -1,11 +1,16 @@
 FROM node:6.3.1
 
-# Code Climate creates this directory, but let's be extra sure
-RUN mkdir -p /code
+WORKDIR /usr/src/app
+COPY package.json /usr/src/app/
+RUN npm install
+
+RUN useradd -m -u 9000 app
+
+COPY . /usr/src/app
+RUN chown -R app:app /usr/src/app
+
+USER app
 
 WORKDIR /code
-ADD . /code
-
-RUN npm install
 
 CMD ["node", "index.js"]
